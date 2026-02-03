@@ -1,23 +1,40 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { TypeSearch, CategorySection, TypeDetailModal } from '@/components/admin/glossary';
-import { bastaSections, searchTypes, type BastaType, type TypeCategory } from '@/lib/basta-types';
+import { TypeSearch, CategorySection, TypeDetailModal, ApiSelector } from '@/components/admin/glossary';
+import {
+  bastaSections,
+  searchTypes,
+  typeCounts,
+  type BastaType,
+  type TypeCategory,
+  type ApiSource,
+} from '@/lib/basta-types';
+import {
+  bastaClientSections,
+  searchClientTypes,
+  clientTypeCounts,
+  type BastaClientType,
+} from '@/lib/basta-client-types';
 
 export default function GlossaryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilters, setCategoryFilters] = useState<TypeCategory[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [selectedType, setSelectedType] = useState<BastaType | null>(null);
+  const [selectedType, setSelectedType] = useState<BastaType | BastaClientType | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedApi, setSelectedApi] = useState<ApiSource>('management');
+
+  // Get the appropriate sections based on selected API
+  const currentSections = selectedApi === 'management' ? bastaSections : bastaClientSections;
 
   // Filter sections based on search and category filters
   const filteredSections = useMemo(() => {
     if (!searchQuery && categoryFilters.length === 0) {
-      return bastaSections;
+      return currentSections;
     }
 
-    return bastaSections.map((section) => {
+    return currentSections.map((section) => {
       let filteredTypes = section.types;
 
       // Apply search filter
@@ -33,22 +50,29 @@ export default function GlossaryPage() {
       // Apply category filter
       if (categoryFilters.length > 0) {
         filteredTypes = filteredTypes.filter((type) =>
-          categoryFilters.includes(type.category)
+          categoryFilters.includes(type.category as TypeCategory)
         );
       }
 
       return { ...section, types: filteredTypes };
     }).filter((section) => section.types.length > 0);
-  }, [searchQuery, categoryFilters]);
+  }, [searchQuery, categoryFilters, currentSections]);
 
   // Calculate total results
   const totalResults = useMemo(() => {
     return filteredSections.reduce((acc, section) => acc + section.types.length, 0);
   }, [filteredSections]);
 
-  const handleTypeClick = (type: BastaType) => {
+  const handleTypeClick = (type: BastaType | BastaClientType) => {
     setSelectedType(type);
     setModalOpen(true);
+  };
+
+  const handleApiChange = (api: ApiSource) => {
+    setSelectedApi(api);
+    // Clear filters when switching APIs
+    setSearchQuery('');
+    setCategoryFilters([]);
   };
 
   return (
@@ -59,9 +83,18 @@ export default function GlossaryPage() {
           API Type Glossary
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Complete reference of all BASTA Management API types, inputs, and enums
+          Complete reference of BASTA API types, inputs, enums, and subscriptions
         </p>
       </div>
+
+      {/* API Selector */}
+      <ApiSelector
+        selected={selectedApi}
+        onSelect={handleApiChange}
+        managementCount={typeCounts.total}
+        clientCount={clientTypeCounts.total}
+        subscriptionCount={clientTypeCounts.subscriptions}
+      />
 
       {/* Search and Filters */}
       <TypeSearch
@@ -84,7 +117,7 @@ export default function GlossaryPage() {
           filteredSections.map((section) => (
             <CategorySection
               key={section.slug}
-              section={section}
+              section={section as any}
               onTypeClick={handleTypeClick}
               defaultExpanded={filteredSections.length <= 3}
               viewMode={viewMode}
@@ -95,7 +128,7 @@ export default function GlossaryPage() {
 
       {/* Type Detail Modal */}
       <TypeDetailModal
-        type={selectedType}
+        type={selectedType as BastaType}
         isOpen={modalOpen}
         onClose={() => {
           setModalOpen(false);

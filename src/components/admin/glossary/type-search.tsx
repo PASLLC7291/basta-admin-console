@@ -24,6 +24,7 @@ const allCategories: TypeCategory[] = [
   'Edge',
   'Interface',
   'Scalar',
+  'Subscription',
 ];
 
 export function TypeSearch({

@@ -11,7 +11,10 @@ export type TypeCategory =
   | 'Connection'
   | 'Edge'
   | 'Interface'
-  | 'Scalar';
+  | 'Scalar'
+  | 'Subscription';
+
+export type ApiSource = 'management' | 'client';
 
 export interface BastaType {
   name: string;
@@ -19,6 +22,9 @@ export interface BastaType {
   description: string;
   fields?: string[];
   section: string;
+  apiSource?: ApiSource;
+  icon?: string;
+  isSubscription?: boolean;
 }
 
 export interface BastaSection {
@@ -554,3 +560,8 @@ export function searchTypes(query: string): BastaType[] {
       type.description.toLowerCase().includes(lowerQuery)
   );
 }
+
+// Combined type that works with both APIs
+export type UnifiedBastaType = BastaType & {
+  apiSource: ApiSource;
+};

@@ -18,10 +18,16 @@ import {
   Settings,
   Radio,
   Database,
+  User,
+  CreditCard,
+  Search,
+  Tag,
+  Hash,
   type LucideIcon,
 } from 'lucide-react';
 
 const sectionIcons: Record<string, LucideIcon> = {
+  // Management API sections
   accounts: Building2,
   sales: Gavel,
   items: Package,
@@ -34,6 +40,14 @@ const sectionIcons: Record<string, LucideIcon> = {
   config: Settings,
   live: Radio,
   core: Database,
+  // Client API sections
+  'core-query': Database,
+  bidding: TrendingUp,
+  user: User,
+  payments: CreditCard,
+  search: Search,
+  metadata: Tag,
+  scalars: Hash,
 };
 
 interface CategorySectionProps {

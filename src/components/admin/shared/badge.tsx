@@ -19,7 +19,8 @@ type BadgeVariant =
   | 'connection'
   | 'edge'
   | 'interface'
-  | 'scalar';
+  | 'scalar'
+  | 'subscription';
 
 type BadgeSize = 'sm' | 'md' | 'lg';
 
@@ -49,6 +50,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   edge: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400',
   interface: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-400',
   scalar: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400',
+  subscription: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400',
 };
 
 const sizeStyles: Record<BadgeSize, string> = {
@@ -85,6 +87,7 @@ export function getCategoryVariant(category: string): BadgeVariant {
     Edge: 'edge',
     Interface: 'interface',
     Scalar: 'scalar',
+    Subscription: 'subscription',
   };
   return categoryMap[category] || 'default';
 }

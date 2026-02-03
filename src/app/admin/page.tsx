@@ -14,17 +14,26 @@ import {
   ArrowRight,
   BarChart3,
   Zap,
+  Database,
+  User,
+  Bell,
+  Search,
+  CreditCard,
 } from 'lucide-react';
 import { Card, StatCard } from '@/components/admin/shared/card';
 import { StatusIndicator } from '@/components/admin/shared/status-indicator';
 import { typeCounts, bastaSections } from '@/lib/basta-types';
+import { clientTypeCounts, bastaClientSections, subscriptionTypes } from '@/lib/basta-client-types';
 
 export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('24h');
 
-  // Mock data for demonstration
+  // Combined stats
   const stats = {
-    totalTypes: typeCounts.total,
+    managementTypes: typeCounts.total,
+    clientTypes: clientTypeCounts.total,
+    combinedTypes: typeCounts.total + clientTypeCounts.total,
+    subscriptions: subscriptionTypes.length,
     apiCalls: '45.2K',
     activeUsers: '1,234',
     activeSales: 42,
@@ -54,7 +63,7 @@ export default function AdminDashboard() {
             Dashboard
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            BASTA Management API Overview
+            BASTA API Overview - Management & Client APIs
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -62,35 +71,35 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Combined API Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label="Total API Types"
-          value={stats.totalTypes}
-          change="+12 from schema update"
-          changeType="increase"
-          icon={<BarChart3 className="h-6 w-6 text-blue-600 dark:text-blue-400" />}
-        />
-        <StatCard
-          label="API Calls (24h)"
-          value={stats.apiCalls}
-          change="+12.5% from yesterday"
-          changeType="increase"
-          icon={<Activity className="h-6 w-6 text-green-600 dark:text-green-400" />}
-        />
-        <StatCard
-          label="Active Users"
-          value={stats.activeUsers}
-          change="+48 new this week"
-          changeType="increase"
-          icon={<Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />}
-        />
-        <StatCard
-          label="Active Sales"
-          value={stats.activeSales}
-          change="8 closing today"
+          label="Management API Types"
+          value={stats.managementTypes}
+          change="Admin operations"
           changeType="neutral"
-          icon={<Gavel className="h-6 w-6 text-amber-600 dark:text-amber-400" />}
+          icon={<Database className="h-6 w-6 text-blue-600 dark:text-blue-400" />}
+        />
+        <StatCard
+          label="Client API Types"
+          value={stats.clientTypes}
+          change="User-facing"
+          changeType="neutral"
+          icon={<User className="h-6 w-6 text-purple-600 dark:text-purple-400" />}
+        />
+        <StatCard
+          label="Real-Time Subscriptions"
+          value={stats.subscriptions}
+          change="WebSocket events"
+          changeType="neutral"
+          icon={<Bell className="h-6 w-6 text-purple-600 dark:text-purple-400" />}
+        />
+        <StatCard
+          label="Combined Types"
+          value={stats.combinedTypes}
+          change="Total API surface"
+          changeType="neutral"
+          icon={<Zap className="h-6 w-6 text-amber-600 dark:text-amber-400" />}
         />
       </div>
 
@@ -132,13 +141,13 @@ export default function AdminDashboard() {
                 <p className="text-2xl font-bold text-green-700 dark:text-green-400">99.8%</p>
                 <p className="text-xs text-green-600 dark:text-green-500">uptime</p>
               </div>
-              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
-                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  <span className="text-sm font-medium text-green-700 dark:text-green-400">Webhooks</span>
+                  <Bell className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <span className="text-sm font-medium text-purple-700 dark:text-purple-400">Subscriptions</span>
                 </div>
-                <p className="text-2xl font-bold text-green-700 dark:text-green-400">98.5%</p>
-                <p className="text-xs text-green-600 dark:text-green-500">delivery rate</p>
+                <p className="text-2xl font-bold text-purple-700 dark:text-purple-400">100%</p>
+                <p className="text-xs text-purple-600 dark:text-purple-500">connected</p>
               </div>
               <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
@@ -230,36 +239,136 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Type Categories Overview */}
+      {/* API Sections Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Management API Categories */}
+        <Card>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                Management API
+              </h2>
+            </div>
+            <Link
+              href="/admin/glossary"
+              className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {bastaSections.slice(0, 6).map((section) => (
+              <Link
+                key={section.slug}
+                href={`/admin/glossary?section=${section.slug}`}
+                className="p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+              >
+                <h3 className="font-medium text-zinc-900 dark:text-white text-sm">
+                  {section.name}
+                </h3>
+                <p className="text-lg font-bold text-blue-600 dark:text-blue-400 mt-1">
+                  {section.types.length}
+                </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">types</p>
+              </Link>
+            ))}
+          </div>
+        </Card>
+
+        {/* Client API Categories */}
+        <Card>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                Client API
+              </h2>
+            </div>
+            <Link
+              href="/admin/client-api"
+              className="inline-flex items-center gap-1 text-sm text-purple-600 dark:text-purple-400 hover:underline"
+            >
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {bastaClientSections.slice(0, 6).map((section) => (
+              <Link
+                key={section.slug}
+                href={`/admin/glossary?section=${section.slug}`}
+                className="p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+              >
+                <h3 className="font-medium text-zinc-900 dark:text-white text-sm">
+                  {section.name}
+                </h3>
+                <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-1">
+                  {section.types.length}
+                </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">types</p>
+              </Link>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Client API Feature Cards */}
       <Card>
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">
-            API Type Categories
+            Client API Features
           </h2>
           <Link
-            href="/admin/glossary"
-            className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            href="/admin/client-api"
+            className="inline-flex items-center gap-1 text-sm text-purple-600 dark:text-purple-400 hover:underline"
           >
-            View full glossary
+            Explore Client API
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {bastaSections.map((section) => (
-            <Link
-              key={section.slug}
-              href={`/admin/glossary?section=${section.slug}`}
-              className="p-4 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-            >
-              <h3 className="font-semibold text-zinc-900 dark:text-white">
-                {section.name}
-              </h3>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-                {section.types.length}
-              </p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">types</p>
-            </Link>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Link
+            href="/admin/client-api/subscriptions"
+            className="p-4 border border-purple-200 dark:border-purple-800 rounded-lg bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+          >
+            <Bell className="h-6 w-6 text-purple-600 dark:text-purple-400 mb-2" />
+            <h3 className="font-semibold text-zinc-900 dark:text-white">Subscriptions</h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
+              {subscriptionTypes.length} real-time types
+            </p>
+          </Link>
+          <Link
+            href="/admin/client-api/search"
+            className="p-4 border border-blue-200 dark:border-blue-800 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+          >
+            <Search className="h-6 w-6 text-blue-600 dark:text-blue-400 mb-2" />
+            <h3 className="font-semibold text-zinc-900 dark:text-white">Search</h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
+              Faceted discovery
+            </p>
+          </Link>
+          <Link
+            href="/admin/client-api/payments"
+            className="p-4 border border-green-200 dark:border-green-800 rounded-lg bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+          >
+            <CreditCard className="h-6 w-6 text-green-600 dark:text-green-400 mb-2" />
+            <h3 className="font-semibold text-zinc-900 dark:text-white">Payments</h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
+              Stripe integration
+            </p>
+          </Link>
+          <Link
+            href="/admin/client-api/verification"
+            className="p-4 border border-amber-200 dark:border-amber-800 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+          >
+            <Users className="h-6 w-6 text-amber-600 dark:text-amber-400 mb-2" />
+            <h3 className="font-semibold text-zinc-900 dark:text-white">Verification</h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
+              KYC/Identity
+            </p>
+          </Link>
         </div>
       </Card>
     </div>
